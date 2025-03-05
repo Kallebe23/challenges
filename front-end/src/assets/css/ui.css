@@ -1,0 +1,16 @@
+.ui-button {
+  padding: 4px;
+  padding-left: 8px;
+  padding-right: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 16px;
+  text-align: center;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  color: inherit;
+  border: 1px solid var(--color-border);
+  border-radius: 3px;
+  cursor: pointer;
+}

@@ -1,0 +1,45 @@
+:root {
+  --background: #e3eaef;
+  --section-background: #fff;
+  --foreground: #171717;
+  --header-background: #17192d;
+
+  --color-primary: #2188ff;
+  --color-secondary: #023b78;
+  --color-border: #d8dfe6;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --background: #0a0a0a;
+    --section-background: #0a0a0a;
+
+    --foreground: #ededed;
+    --header-background: #17192d;
+
+    --color-primary: #2188ff;
+    --color-secondary: #023b78;
+    --color-border: #d8dfe6;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Inter, sans-serif;
+}
+
+main {
+  padding-top: 48px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+button {
+  border: none;
+}
+
+a {
+  text-decoration: none;
+}

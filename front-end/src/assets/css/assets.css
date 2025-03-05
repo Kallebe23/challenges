@@ -1,0 +1,13 @@
+.sub-section {
+  border: 1px solid #d8dfe6;
+  border-radius: 2px;
+}
+
+.tree-option-container {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 8px;
+  padding-left: 8px;
+  cursor: pointer;
+}
