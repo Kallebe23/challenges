@@ -1,43 +1,36 @@
 import Image from "next/image";
+
+import EnergySensorIcon from "@/assets/icons/energy-sensor.svg";
 import ArrowDownIcon from "@/assets/icons/arrow-down.svg";
-import ComponentIcon from "@/assets/icons/component.png";
-import LocationIcon from "@/assets/icons/location.svg";
-import AssetIcon from "@/assets/icons/asset.svg";
-import { StaticImport } from "next/dist/shared/lib/get-img-props";
-import { Tree } from "../../hooks/use-tree";
-import { useState } from "react";
 
-interface TreeOptionProps {
+import { Tree, TreeItem } from "../../hooks/use-tree";
+import { SensorType } from "@/types/assets";
+import { statusIcons, typeIcons } from "./asset-icons";
+
+export type TreeOptionProps = {
   type: "location" | "component" | "asset";
-  name: string;
   subItems: Tree;
-}
-
-const typeIcons: Record<TreeOptionProps["type"], StaticImport> = {
-  location: LocationIcon,
-  asset: AssetIcon,
-  component: ComponentIcon,
+  item: TreeItem;
 };
 
-export default function TreeOption({ type, name, subItems }: TreeOptionProps) {
+export default function TreeOption({ type, subItems, item }: TreeOptionProps) {
   const typeIcon = typeIcons[type];
-  const [showSubItems, setShowSubItems] = useState(false);
 
-  const toggleShowSubItems = () => {
-    setShowSubItems(!showSubItems);
-  };
+  const statusIcon = item.status ? statusIcons[item.status] : null;
 
   return (
-    <>
-      <div onClick={toggleShowSubItems} className="tree-option-container">
+    <details>
+      <summary>
         {!!subItems.length && (
           <Image
+            className="show-sub-items-indicator"
             src={ArrowDownIcon}
-            style={{ transform: `rotate(${showSubItems ? "0" : "180"}deg)` }}
-            alt="Tree item toggle indicator"
+            width={12}
+            height={12}
+            objectFit="contain"
+            alt="Show sub items indicator"
           />
         )}
-
         <Image
           src={typeIcon}
           width={20}
@@ -45,26 +38,34 @@ export default function TreeOption({ type, name, subItems }: TreeOptionProps) {
           objectFit="contain"
           alt="Tree item type"
         />
-        <p>{name}</p>
-      </div>
-      {showSubItems && (
-        <div
-          style={{
-            display: "block",
-            marginLeft: 12,
-            borderLeft: "1px solid #ddd",
-          }}
-        >
-          {subItems.map(({ item, children, type }) => (
-            <TreeOption
-              key={item.id}
-              name={item.name}
-              type={type}
-              subItems={children}
-            />
-          ))}
-        </div>
-      )}
-    </>
+        <p>{item.name}</p>
+
+        {!!statusIcon && (
+          <Image
+            src={statusIcon}
+            width={12}
+            height={12}
+            objectFit="contain"
+            alt="Asset status"
+          />
+        )}
+        {item.sensorType === SensorType.energy && (
+          <Image
+            src={EnergySensorIcon}
+            width={12}
+            height={12}
+            objectFit="contain"
+            alt="Energy sensor indicator"
+          />
+        )}
+      </summary>
+      <ul>
+        {subItems.map(({ item, children, type }) => (
+          <li key={item.id}>
+            <TreeOption item={item} type={type} subItems={children} />
+          </li>
+        ))}
+      </ul>
+    </details>
   );
 }

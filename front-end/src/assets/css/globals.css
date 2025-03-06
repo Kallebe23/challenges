@@ -30,8 +30,9 @@ body {
 }
 
 main {
-  padding-top: 48px;
-  min-height: 100vh;
+  padding: 8px;
+  padding-top: 56px;
+  height: 100vh;
   display: flex;
   flex-direction: column;
 }

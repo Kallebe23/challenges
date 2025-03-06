@@ -2,11 +2,11 @@ import "@/assets/css/reset.css";
 import "@/assets/css/globals.css";
 import "@/assets/css/layout.css";
 import "@/assets/css/ui.css";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import Header from "@/components/header";
-import ReactQueryProvider from "@/lib/react-query/provider";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -28,7 +28,7 @@ export default function RootLayout({
       <body className={`${inter.variable} antialiased`}>
         <Header />
         <main>
-          <ReactQueryProvider>{children}</ReactQueryProvider>
+          <NuqsAdapter>{children}</NuqsAdapter>
         </main>
       </body>
     </html>

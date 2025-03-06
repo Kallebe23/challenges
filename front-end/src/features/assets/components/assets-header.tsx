@@ -9,6 +9,8 @@ export default async function CompanyAssetsHeader({
 }: {
   companyId: string;
 }) {
+  // automatically memoized by nextjs if requested on another server component
+  // https://nextjs.org/docs/app/building-your-application/caching#request-memoization
   const companies = await getCompanies();
   const selectedCompany = companies.find((company) => company.id === companyId);
 

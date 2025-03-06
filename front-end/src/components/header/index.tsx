@@ -19,7 +19,7 @@ export default async function Header() {
           <CompanyLink
             key={company.id}
             company={company}
-            href={`/companies/${company.id}`}
+            href={`/companies/${company.id}/assets`}
           />
         ))}
       </nav>

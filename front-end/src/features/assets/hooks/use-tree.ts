@@ -1,8 +1,23 @@
-import { CompanyAsset, CompanyLocation } from "@/types/assets";
+import {
+  AssetStatus,
+  CompanyAsset,
+  CompanyLocation,
+  SensorType,
+} from "@/types/assets";
 import { useCallback, useMemo } from "react";
 
+export type TreeItem = {
+  id: string;
+  name: string;
+  parentId: string | null;
+
+  locationId?: string | null;
+  sensorType?: SensorType | null;
+  status?: AssetStatus | null;
+};
+
 export type Tree = {
-  item: CompanyLocation | CompanyAsset;
+  item: TreeItem;
   children: Tree;
   type: "asset" | "component" | "location";
 }[];

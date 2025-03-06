@@ -9,6 +9,16 @@ export type CompanyLocation = {
   parentId: string | null;
 };
 
+export type CompanyAsset = {
+  id: string;
+  name: string;
+  parentId: string | null;
+
+  locationId: string | null;
+  sensorType: SensorType | null;
+  status: AssetStatus | null;
+};
+
 export enum SensorType {
   vibration = "vibration",
   energy = "energy",
@@ -18,12 +28,3 @@ export enum AssetStatus {
   operating = "operating",
   alert = "alert",
 }
-
-export type CompanyAsset = {
-  id: string;
-  locationId: string | null;
-  name: string;
-  parentId: string | null;
-  sensorType: SensorType | null;
-  status: AssetStatus | null;
-};
