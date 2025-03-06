@@ -1,18 +1,14 @@
-import TreeFilter from "./tree-filter";
-
 import { Suspense } from "react";
-import TreeStructure from "./tree-structure";
+import TreeFilter from "./tree-filter";
+import TreeServerWrapper from "./tree-server-wrapper";
+import TreeSkeleton from "./tree-skeleton";
 
-interface AssetsTreeProps {
-  companyId: string;
-}
-
-export default async function AssetsTree({ companyId }: AssetsTreeProps) {
+export default async function AssetsTree({ companyId }: { companyId: string }) {
   return (
     <section className="company-assets-sub-section">
       <TreeFilter />
-      <Suspense>
-        <TreeStructure companyId={companyId} />
+      <Suspense fallback={<TreeSkeleton />}>
+        <TreeServerWrapper companyId={companyId} />
       </Suspense>
     </section>
   );

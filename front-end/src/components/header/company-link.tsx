@@ -28,12 +28,7 @@ export default function CompanyLink({ company, ...props }: CompanyButtonProps) {
           backgroundColor: ` var(${backgroundColor})`,
         }}
       >
-        <Image
-          src={CompanyIcon}
-          alt="company icon"
-          height={14}
-          objectFit="contain"
-        />
+        <Image src={CompanyIcon} alt="company icon" height={14} />
         {`${company.name} Unit`}
       </button>
     </Link>

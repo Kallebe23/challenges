@@ -10,7 +10,7 @@ import { serialize } from "@/searchParams";
 // since we need to "listen" to user input and react to its change this should be a client component
 export default function TreeFilter() {
   const [filter, setFilter] = useQueryState("filter");
-  const debouncedFilter = useDebounce(filter || "", 400);
+  const debouncedFilter = useDebounce(filter || "", 500);
   const { push } = useRouter();
   const { companyId } = useParams<{ companyId: string }>();
 

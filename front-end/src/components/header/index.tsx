@@ -8,7 +8,7 @@ export default async function Header() {
 
   return (
     <header className="main-header">
-      <Image src={Logo} alt="logo" height={14} objectFit="contain" />
+      <Image src={Logo} alt="logo" height={14} />
       <nav
         style={{
           display: "flex",

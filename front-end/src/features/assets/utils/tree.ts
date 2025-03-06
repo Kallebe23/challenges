@@ -15,66 +15,93 @@ export type TreeItem = {
   status?: AssetStatus | null;
 };
 
+export type TreeItemType = "asset" | "component" | "location";
+
 export type Tree = {
   item: TreeItem;
   children: Tree;
-  type: "asset" | "component" | "location";
+  type: TreeItemType;
 }[];
 
 export function recursiveTreeFilter(tree: Tree, filter: string): Tree {
+  const lowerFilter = filter.toLowerCase();
+
   return tree
-    .filter(
-      ({ item, children }) =>
-        item.name.toLowerCase().includes(filter.toLowerCase()) ||
-        !!recursiveTreeFilter(children, filter).length
-    )
-    .map(({ children, ...rest }) => ({
-      ...rest,
-      children: recursiveTreeFilter(children, filter),
-    }));
+    .map(({ children, ...rest }) => {
+      const filteredChildren = recursiveTreeFilter(children, filter);
+      const matches =
+        rest.item.name.toLowerCase().includes(lowerFilter) ||
+        filteredChildren.length > 0;
+
+      return matches
+        ? {
+            ...rest,
+            children: filteredChildren,
+          }
+        : null;
+    })
+    .filter(Boolean) as Tree;
 }
 
 export function mountTree(
   locations: CompanyLocation[],
   assets: CompanyAsset[]
-) {
-  const getChildren = (parentId: string): Tree => {
-    const locationsTree: Tree = locations
-      .filter((location) => location.parentId === parentId)
-      .map((location) => ({
-        item: location,
-        children: getChildren(location.id),
-        type: "location",
-      }));
+): Tree {
+  const locationMap = new Map<string, CompanyLocation[]>();
+  const assetMap = new Map<string, CompanyAsset[]>();
 
-    const assetsTree: Tree = assets
-      .filter(
-        (asset) => asset.parentId === parentId || asset.locationId === parentId
-      )
-      .map((asset) => ({
-        item: asset,
-        children: getChildren(asset.id),
-        type: !!asset.sensorType ? "component" : "asset",
-      }));
+  for (const location of locations) {
+    if (!locationMap.has(location.parentId || "")) {
+      locationMap.set(location.parentId || "", []);
+    }
+    locationMap.get(location.parentId || "")!.push(location);
+  }
 
-    return [...locationsTree, ...assetsTree];
-  };
+  for (const asset of assets) {
+    const key = asset.parentId || asset.locationId || "";
+    if (!assetMap.has(key)) {
+      assetMap.set(key, []);
+    }
+    assetMap.get(key)!.push(asset);
+  }
 
-  const locationsTree: Tree = locations
-    .filter((location) => !location.parentId)
-    .map((location) => ({
+  const buildTree = (parentId: string = ""): Tree => {
+    const locationNodes = (locationMap.get(parentId) || []).map((location) => ({
       item: location,
-      children: getChildren(location.id),
+      children: buildTree(location.id),
       type: "location",
     }));
 
-  const assetsTree: Tree = assets
-    .filter((asset) => !asset.parentId && !asset.locationId)
-    .map((asset) => ({
+    const assetNodes = (assetMap.get(parentId) || []).map((asset) => ({
       item: asset,
-      children: getChildren(asset.id),
+      children: buildTree(asset.id),
       type: asset.sensorType ? "component" : "asset",
     }));
 
-  return [...locationsTree, ...assetsTree];
+    return [...locationNodes, ...assetNodes] as Tree;
+  };
+
+  return buildTree();
+}
+
+export function flattenTree(
+  tree: Tree,
+  expanded?: Set<string>,
+  depth = 0,
+  result: {
+    item: TreeItem;
+    type: TreeItemType;
+    hasChildren: boolean;
+    depth: number;
+  }[] = []
+) {
+  for (const { item, children, type } of tree) {
+    result.push({ item, type, depth, hasChildren: !!children.length });
+
+    if (!expanded || (item && expanded.has(item.id))) {
+      flattenTree(children, expanded, depth + 1, result);
+    }
+  }
+
+  return result;
 }

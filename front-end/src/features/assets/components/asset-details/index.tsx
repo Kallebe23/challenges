@@ -15,13 +15,7 @@ export default function AssetDetails() {
       >
         <h1>{}</h1>
         {statusIcon && (
-          <Image
-            src={statusIcon}
-            width={12}
-            height={12}
-            objectFit="contain"
-            alt="Asset status"
-          />
+          <Image src={statusIcon} width={12} height={12} alt="Asset status" />
         )}
       </header>
     </section>
