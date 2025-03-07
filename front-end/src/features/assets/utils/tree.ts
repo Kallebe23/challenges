@@ -23,15 +23,37 @@ export type Tree = {
   type: TreeItemType;
 }[];
 
-export function recursiveTreeFilter(tree: Tree, filter: string): Tree {
-  const lowerFilter = filter.toLowerCase();
+export function recursiveTreeFilter(
+  tree: Tree,
+  filters: {
+    name: string;
+    onlyCritical: boolean;
+    onlyEnergySensors: boolean;
+  }
+): Tree {
+  const { name, onlyCritical, onlyEnergySensors } = filters;
+  const lowerNameFilter = name.toLowerCase();
 
   return tree
     .map(({ children, ...rest }) => {
-      const filteredChildren = recursiveTreeFilter(children, filter);
-      const matches =
-        rest.item.name.toLowerCase().includes(lowerFilter) ||
-        filteredChildren.length > 0;
+      const filteredChildren = recursiveTreeFilter(children, filters);
+      const isNameValid = rest.item.name
+        .toLowerCase()
+        .includes(lowerNameFilter);
+
+      let matches = isNameValid;
+
+      if (onlyCritical && rest.item.status !== AssetStatus.alert) {
+        matches = false;
+      }
+
+      if (onlyEnergySensors && rest.item.sensorType !== SensorType.energy) {
+        matches = false;
+      }
+
+      if (filteredChildren.length > 0) {
+        matches = true;
+      }
 
       return matches
         ? {

@@ -1,8 +1,5 @@
-import Button from "@/components/ui/button";
-import Image from "next/image";
-import EnergyIcon from "@/assets/icons/energy.svg";
-import AlertRounded from "@/assets/icons/alert-rounded.svg";
 import { getCompanies } from "@/services/tractian-fake-api";
+import AssetsFilters from "./assets-filters";
 
 export default async function CompanyAssetsHeader({
   companyId,
@@ -28,20 +25,7 @@ export default async function CompanyAssetsHeader({
           / {selectedCompany?.name || ""} Unit
         </h4>
       </div>
-      <div style={{ display: "flex", gap: 8 }}>
-        <Button
-          style={{ color: "#77818C" }}
-          startIcon={<Image alt={"energy icon"} src={EnergyIcon} />}
-        >
-          Sensor de Energia
-        </Button>
-        <Button
-          style={{ backgroundColor: "var(--color-primary)", color: "white" }}
-          startIcon={<Image alt={"energy icon"} src={AlertRounded} />}
-        >
-          Crítico
-        </Button>
-      </div>
+      <AssetsFilters companyId={companyId} />
     </header>
   );
 }

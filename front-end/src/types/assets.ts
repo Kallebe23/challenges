@@ -14,6 +14,9 @@ export type CompanyAsset = {
   name: string;
   parentId: string | null;
 
+  sensorId?: string;
+  gatewayId?: string;
+
   locationId: string | null;
   sensorType: SensorType | null;
   status: AssetStatus | null;

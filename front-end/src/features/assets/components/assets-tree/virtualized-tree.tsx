@@ -1,29 +1,31 @@
 "use client";
 
-import { flattenTree, Tree } from "../../utils/tree";
+import { flattenTree, Tree, TreeItemType } from "../../utils/tree";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useEffect, useRef, useState } from "react";
 import TreeItemRow from "./tree-item";
+import { useFilters } from "../../hooks/use-filters";
+import { useRouter } from "next/navigation";
+import { useCompanyId } from "@/hooks/use-company-id";
+import { serialize } from "@/searchParams";
 
-export default function VirtualizedTree({
-  tree,
-  filter,
-}: {
-  tree: Tree;
-  filter: string;
-}) {
+export default function VirtualizedTree({ tree }: { tree: Tree }) {
+  const [filters] = useFilters();
+  const { push } = useRouter();
+  const companyId = useCompanyId();
+
   const parentRef = useRef(null);
-
   const [expanded, setExpanded] = useState<Set<string>>(new Set([]));
   const [flattenedTree, setFlattenedTree] = useState(() => flattenTree(tree));
 
   useEffect(() => {
-    if (filter) {
+    const { filter, onlyEnergySensors, onlyCritical } = filters;
+    if (filter || onlyCritical || onlyEnergySensors) {
       const allExpanded: Set<string> = new Set([]);
       flattenTree(tree).forEach(({ item }) => allExpanded.add(item.id));
       setExpanded(allExpanded);
     }
-  }, [filter, tree]);
+  }, [filters, tree]);
 
   useEffect(() => {
     setFlattenedTree(flattenTree(tree, expanded));
@@ -36,7 +38,7 @@ export default function VirtualizedTree({
     overscan: 10,
   });
 
-  const toggleItem = (id: string) => {
+  const toggleItem = (id: string, type: TreeItemType) => {
     setExpanded((prev) => {
       const next = new Set(prev);
       if (next.has(id)) {
@@ -47,6 +49,14 @@ export default function VirtualizedTree({
 
       return next;
     });
+
+    if (type === "component") {
+      const url = serialize(`/companies/${companyId}/assets`, {
+        ...filters,
+        asset: id,
+      });
+      push(url);
+    }
   };
 
   return (

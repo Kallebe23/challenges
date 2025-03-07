@@ -22,7 +22,7 @@ export default async function CompanyAssetsPage({
       <CompanyAssetsHeader companyId={companyId} />
       <div className="assets-sections-container">
         <AssetsTree companyId={companyId} />
-        <AssetDetails />
+        <AssetDetails companyId={companyId} />
       </div>
     </section>
   );

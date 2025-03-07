@@ -1,18 +1,21 @@
 "use client";
 import Image from "next/image";
-import { useQueryState } from "nuqs";
-import { ChangeEvent, useEffect } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import SearchIcon from "@/assets/icons/search.svg";
-import { useDebounce } from "@/hooks/use-debounce";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { serialize } from "@/searchParams";
+import { useCompanyId } from "@/hooks/use-company-id";
+import { useDebounce } from "@/hooks/use-debounce";
 
 // since we need to "listen" to user input and react to its change this should be a client component
 export default function TreeFilter() {
-  const [filter, setFilter] = useQueryState("filter");
-  const debouncedFilter = useDebounce(filter || "", 500);
+  const searchParams = useSearchParams();
+  const filterParam = searchParams.get("filter");
+  const [filter, setFilter] = useState(filterParam || "");
+  const debouncedFilter = useDebounce(filter, 500);
+
   const { push } = useRouter();
-  const { companyId } = useParams<{ companyId: string }>();
+  const companyId = useCompanyId();
 
   useEffect(() => {
     push(
@@ -35,7 +38,12 @@ export default function TreeFilter() {
         spellCheck={false}
         placeholder="Buscar Ativo ou Local"
       />
-      <div style={{ paddingRight: 12, paddingLeft: 12 }}>
+      <div
+        style={{
+          paddingRight: 12,
+          paddingLeft: 12,
+        }}
+      >
         <Image src={SearchIcon} alt="search icon" height={14} width={14} />
       </div>
     </header>

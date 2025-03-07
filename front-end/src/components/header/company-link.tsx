@@ -3,15 +3,15 @@ import { Company } from "@/types/assets";
 import Link, { LinkProps } from "next/link";
 import Image from "next/image";
 import CompanyIcon from "@/assets/icons/company.svg";
-import { useParams } from "next/navigation";
 import { useMemo } from "react";
+import { useCompanyId } from "@/hooks/use-company-id";
 
 interface CompanyButtonProps extends LinkProps {
   company: Company;
 }
 
 export default function CompanyLink({ company, ...props }: CompanyButtonProps) {
-  const { companyId } = useParams<{ companyId: string }>();
+  const companyId = useCompanyId();
 
   const backgroundColor = useMemo(() => {
     if (companyId === company.id) {

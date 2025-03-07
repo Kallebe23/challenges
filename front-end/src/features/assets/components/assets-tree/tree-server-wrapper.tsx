@@ -13,7 +13,8 @@ export default async function TreeServerWrapper({
 }: {
   companyId: string;
 }) {
-  const filter = searchParamsCache.get("filter");
+  const { filter, onlyCritical, onlyEnergySensors } = searchParamsCache.all();
+
   const assetsPromise = getCompanyAssets(companyId);
   const locationsPromise = getCompanyLocations(companyId);
 
@@ -23,7 +24,11 @@ export default async function TreeServerWrapper({
   ]);
 
   const tree = mountTree(locations, assets);
-  const filteredTree = filter ? recursiveTreeFilter(tree, filter) : tree;
+  const filteredTree = recursiveTreeFilter(tree, {
+    name: filter,
+    onlyCritical,
+    onlyEnergySensors,
+  });
 
-  return <VirtualizedTree tree={filteredTree} filter={filter} />;
+  return <VirtualizedTree tree={filteredTree} />;
 }

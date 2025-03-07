@@ -6,15 +6,17 @@ import ArrowDownIcon from "@/assets/icons/arrow-down.svg";
 
 import { SensorType } from "@/types/assets";
 import { statusIcons, typeIcons } from "./asset-icons";
-import { TreeItem } from "../../utils/tree";
+import { TreeItem, TreeItemType } from "../../utils/tree";
 import { useMemo } from "react";
+import { useSelectedAsset } from "../../hooks/use-selected-asset";
+import SelectedComponentIcon from "@/assets/icons/component-selected.png";
 
 export type TreeOptionProps = {
   type: "location" | "component" | "asset";
   item: TreeItem;
   hasChildren: boolean;
   depth: number;
-  onClick: (id: string) => void;
+  onClick: (id: string, type: TreeItemType) => void;
   expanded: Set<string>;
 };
 
@@ -26,7 +28,7 @@ export default function TreeItemRow({
   onClick,
   expanded,
 }: TreeOptionProps) {
-  const typeIcon = useMemo(() => typeIcons[type], [type]);
+  const [{ asset }] = useSelectedAsset();
 
   const statusIcon = useMemo(
     () => (item.status ? statusIcons[item.status] : null),
@@ -36,16 +38,27 @@ export default function TreeItemRow({
   const isExpanded = useMemo(() => expanded.has(item.id), [expanded, item.id]);
   const leftPadding = depth * 24;
 
+  const isSelected = asset === item.id;
+
+  const typeIcon = useMemo(() => {
+    if (isSelected) {
+      return SelectedComponentIcon;
+    }
+    return typeIcons[type];
+  }, [type, isSelected]);
+
   return (
     <li
       onClick={() => {
-        onClick(item.id);
+        onClick(item.id, type);
       }}
       className="tree-list-item"
       style={{
+        color: isSelected ? "white" : "inherit",
         marginLeft: depth !== 0 ? 4 : 0,
         paddingLeft: leftPadding,
         position: "relative",
+        background: isSelected ? "var(--color-primary)" : undefined,
         // borderLeft: depth !== 0 ? "1px solid #ddd" : "none",
       }}
     >
@@ -77,20 +90,13 @@ export default function TreeItemRow({
           style={{
             transform: `rotate(${isExpanded ? 180 : 0}deg)`,
           }}
-          unoptimized
           src={ArrowDownIcon}
           width={12}
           height={12}
           alt="Show sub items indicator"
         />
       )}
-      <Image
-        unoptimized
-        src={typeIcon}
-        width={20}
-        height={20}
-        alt="Tree item type"
-      />
+      <Image src={typeIcon} width={20} height={20} alt="Tree item type" />
       <p>{item.name}</p>
 
       {!!statusIcon && (
