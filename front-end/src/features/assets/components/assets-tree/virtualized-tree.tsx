@@ -87,6 +87,7 @@ export default function VirtualizedTree(props: { tree: Tree }) {
                   position: "absolute",
                   top: 0,
                   left: 0,
+                  paddingLeft: 12,
                   width: "100%",
                   height: `${itemHeight}px`,
                   transform: `translateY(${

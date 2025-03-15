@@ -11,6 +11,8 @@ import { useDebounce } from "@/hooks/use-debounce";
 export default function TreeFilter() {
   const searchParams = useSearchParams();
   const filterParam = searchParams.get("filter");
+  const onlyCritical = searchParams.get("onlyCritical");
+  const onlyEnergySensors = searchParams.get("onlyEnergySensors");
   const [filter, setFilter] = useState(filterParam || "");
   const debouncedFilter = useDebounce(filter, 500);
 
@@ -21,9 +23,11 @@ export default function TreeFilter() {
     push(
       serialize(`/companies/${companyId}/assets`, {
         filter: debouncedFilter,
+        onlyCritical: Boolean(onlyCritical) || null,
+        onlyEnergySensors: Boolean(onlyEnergySensors) || null,
       })
     );
-  }, [debouncedFilter, companyId, push]);
+  }, [debouncedFilter, companyId, push, onlyEnergySensors, onlyCritical]);
 
   const handleFilterChange = (event: ChangeEvent<HTMLInputElement>) => {
     setFilter(event.target.value);

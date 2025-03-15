@@ -58,6 +58,7 @@ export default function TreeItemRow({
         marginLeft: depth !== 0 ? 4 : 0,
         paddingLeft: leftPadding,
         position: "relative",
+        height: "100%",
         background: isSelected ? "var(--color-primary)" : undefined,
         // borderLeft: depth !== 0 ? "1px solid #ddd" : "none",
       }}
