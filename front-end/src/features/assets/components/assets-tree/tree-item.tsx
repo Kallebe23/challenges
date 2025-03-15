@@ -16,8 +16,8 @@ export type TreeOptionProps = {
   item: TreeItem;
   hasChildren: boolean;
   depth: number;
-  onClick: (id: string, type: TreeItemType) => void;
-  expanded: Set<string>;
+  onClick: (id: string, type: TreeItemType, expanded: boolean) => void;
+  isExpanded: boolean;
 };
 
 export default function TreeItemRow({
@@ -26,7 +26,7 @@ export default function TreeItemRow({
   depth,
   hasChildren,
   onClick,
-  expanded,
+  isExpanded,
 }: TreeOptionProps) {
   const [{ asset }] = useSelectedAsset();
 
@@ -35,7 +35,7 @@ export default function TreeItemRow({
     [item.status]
   );
 
-  const isExpanded = useMemo(() => expanded.has(item.id), [expanded, item.id]);
+  // const isExpanded = useMemo(() => expanded.has(item.id), [expanded, item.id]);
   const leftPadding = depth * 24;
 
   const isSelected = asset === item.id;
@@ -50,7 +50,7 @@ export default function TreeItemRow({
   return (
     <li
       onClick={() => {
-        onClick(item.id, type);
+        onClick(item.id, type, !isExpanded);
       }}
       className="tree-list-item"
       style={{

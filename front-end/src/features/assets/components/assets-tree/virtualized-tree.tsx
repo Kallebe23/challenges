@@ -1,7 +1,12 @@
 "use client";
 
-import { flattenTree, Tree, TreeItemType } from "../../utils/tree";
-import { useVirtualizer } from "@tanstack/react-virtual";
+import {
+  FlattenedTree,
+  flattenTree,
+  toggleTreeItem,
+  Tree,
+  TreeItemType,
+} from "../../utils/tree";
 import { useEffect, useRef, useState } from "react";
 import TreeItemRow from "./tree-item";
 import { useFilters } from "../../hooks/use-filters";
@@ -9,46 +14,39 @@ import { useRouter } from "next/navigation";
 import { useCompanyId } from "@/hooks/use-company-id";
 import { serialize } from "@/searchParams";
 
-export default function VirtualizedTree({ tree }: { tree: Tree }) {
+const itemHeight = 35;
+
+export default function VirtualizedTree(props: { tree: Tree }) {
   const [filters] = useFilters();
   const { push } = useRouter();
   const companyId = useCompanyId();
+  const [scrollTop, setScrollTop] = useState(0);
 
-  const parentRef = useRef(null);
-  const [expanded, setExpanded] = useState<Set<string>>(new Set([]));
-  const [flattenedTree, setFlattenedTree] = useState(() => flattenTree(tree));
-
-  useEffect(() => {
-    const { filter, onlyEnergySensors, onlyCritical } = filters;
-    if (filter || onlyCritical || onlyEnergySensors) {
-      const allExpanded: Set<string> = new Set([]);
-      flattenTree(tree).forEach(({ item }) => allExpanded.add(item.id));
-      setExpanded(allExpanded);
-    }
-  }, [filters, tree]);
+  const [tree, setTree] = useState<Tree>([]);
 
   useEffect(() => {
-    setFlattenedTree(flattenTree(tree, expanded));
-  }, [tree, expanded]);
+    setTree(props.tree);
+  }, [props.tree]);
 
-  const rowVirtualizer = useVirtualizer({
-    count: flattenedTree.length,
-    getScrollElement: () => parentRef.current,
-    estimateSize: () => 24,
-    overscan: 10,
-  });
+  const parentRef = useRef<HTMLDivElement>(null);
+
+  const containerHeight = parentRef.current?.clientHeight || 400;
+
+  const [flattenedTree, setFlattenedTree] = useState<FlattenedTree>(() => []);
+  const startIndex = Math.floor(scrollTop / itemHeight);
+  const endIndex = Math.min(
+    startIndex + Math.ceil(containerHeight / itemHeight),
+    flattenedTree.length
+  );
+
+  useEffect(() => {
+    const flattened = flattenTree(tree);
+    setFlattenedTree(flattened);
+  }, [tree]);
 
   const toggleItem = (id: string, type: TreeItemType) => {
-    setExpanded((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) {
-        next.delete(id);
-      } else {
-        next.add(id);
-      }
-
-      return next;
-    });
+    const newTree = toggleTreeItem(id, tree);
+    setTree([...newTree]);
 
     if (type === "component") {
       const url = serialize(`/companies/${companyId}/assets`, {
@@ -59,27 +57,56 @@ export default function VirtualizedTree({ tree }: { tree: Tree }) {
     }
   };
 
-  return (
-    <div className="tree">
-      <ul
-        ref={parentRef}
-        style={{ height: `${rowVirtualizer.getTotalSize()}px` }}
-      >
-        {rowVirtualizer.getVirtualItems().map(({ index }) => {
-          const { item, type, hasChildren, depth } = flattenedTree[index];
+  const visibleItems = flattenedTree.slice(startIndex, endIndex);
 
-          return (
-            <TreeItemRow
-              expanded={expanded}
-              key={item.id}
-              onClick={toggleItem}
-              item={item}
-              type={type}
-              hasChildren={hasChildren}
-              depth={depth}
-            />
-          );
-        })}
+  return (
+    <div
+      style={{
+        flex: 1,
+        width: "100%",
+        overflowY: "auto",
+      }}
+      ref={parentRef}
+      onScroll={(event) => {
+        setScrollTop(event.currentTarget.scrollTop);
+      }}
+    >
+      <ul
+        style={{
+          height: `${flattenedTree.length * itemHeight}px`,
+          position: "relative",
+          width: "100%",
+        }}
+      >
+        {visibleItems.map(
+          ({ item, type, depth, hasChildren, expanded }, index) => {
+            return (
+              <div
+                key={index}
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  height: `${itemHeight}px`,
+                  transform: `translateY(${
+                    (startIndex + index) * itemHeight
+                  }px)`,
+                }}
+              >
+                <TreeItemRow
+                  isExpanded={expanded}
+                  hasChildren={hasChildren}
+                  key={index}
+                  onClick={toggleItem}
+                  item={item}
+                  type={type}
+                  depth={depth}
+                />
+              </div>
+            );
+          }
+        )}
       </ul>
     </div>
   );
