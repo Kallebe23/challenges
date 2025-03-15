@@ -2,7 +2,7 @@
 import Image from "next/image";
 import { ChangeEvent, useEffect, useState } from "react";
 import SearchIcon from "@/assets/icons/search.svg";
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { serialize } from "@/searchParams";
 import { useCompanyId } from "@/hooks/use-company-id";
 import { useDebounce } from "@/hooks/use-debounce";
@@ -11,8 +11,7 @@ import { useDebounce } from "@/hooks/use-debounce";
 export default function TreeFilter() {
   const searchParams = useSearchParams();
   const filterParam = searchParams.get("filter");
-  const onlyCritical = searchParams.get("onlyCritical");
-  const onlyEnergySensors = searchParams.get("onlyEnergySensors");
+  const pathname = usePathname();
   const [filter, setFilter] = useState(filterParam || "");
   const debouncedFilter = useDebounce(filter, 500);
 
@@ -21,13 +20,11 @@ export default function TreeFilter() {
 
   useEffect(() => {
     push(
-      serialize(`/companies/${companyId}/assets`, {
+      serialize(`${pathname}${window.location.search}`, {
         filter: debouncedFilter,
-        onlyCritical: Boolean(onlyCritical) || null,
-        onlyEnergySensors: Boolean(onlyEnergySensors) || null,
       })
     );
-  }, [debouncedFilter, companyId, push, onlyEnergySensors, onlyCritical]);
+  }, [debouncedFilter, companyId, push, pathname]);
 
   const handleFilterChange = (event: ChangeEvent<HTMLInputElement>) => {
     setFilter(event.target.value);

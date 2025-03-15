@@ -1,6 +1,4 @@
-// import { getAssets } from "../../api/assets";
-// import { getLocations } from "../../api/locations";
-import { mountTree, recursiveTreeFilter } from "../../utils/tree";
+import { filterTree, mountTree } from "../../utils/tree";
 import { searchParamsCache } from "@/searchParams";
 import VirtualizedTree from "./virtualized-tree";
 import {
@@ -26,7 +24,7 @@ export default async function TreeServerWrapper({
   const hasFilter = !!filter || onlyCritical || onlyEnergySensors;
 
   const tree = mountTree(locations, assets, hasFilter);
-  const filteredTree = recursiveTreeFilter(tree, {
+  const filteredTree = filterTree(tree, {
     name: filter,
     onlyCritical,
     onlyEnergySensors,

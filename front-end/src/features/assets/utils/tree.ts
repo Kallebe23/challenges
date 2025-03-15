@@ -17,51 +17,62 @@ export type TreeItem = {
 
 export type TreeItemType = "asset" | "component" | "location";
 
-export type Tree = {
+type TreeNode = {
   item: TreeItem;
   expanded: boolean;
   children: Tree;
   type: TreeItemType;
-}[];
+};
 
-export function recursiveTreeFilter(
-  tree: Tree,
-  filters: {
-    name: string;
-    onlyCritical: boolean;
-    onlyEnergySensors: boolean;
-  }
-): Tree {
+export type Tree = TreeNode[];
+
+type Filters = {
+  name: string;
+  onlyCritical: boolean;
+  onlyEnergySensors: boolean;
+};
+
+// only apply filters
+const isItemValid = (item: TreeItem, filters: Filters) => {
   const { name, onlyCritical, onlyEnergySensors } = filters;
   const lowerNameFilter = name.toLowerCase();
 
+  const isNameValid = item.name.toLowerCase().includes(lowerNameFilter);
+
+  let matches = isNameValid;
+
+  if (onlyCritical && item.status !== AssetStatus.alert) {
+    matches = false;
+  }
+
+  if (onlyEnergySensors && item.sensorType !== SensorType.energy) {
+    matches = false;
+  }
+
+  return matches;
+};
+
+export function filterTree(tree: Tree, filters: Filters): Tree {
   return tree
-    .map(({ children, ...rest }) => {
-      const filteredChildren = recursiveTreeFilter(children, filters);
-      const isNameValid = rest.item.name
-        .toLowerCase()
-        .includes(lowerNameFilter);
+    .map((treeNode) => {
+      const isValid = isItemValid(treeNode.item, filters);
 
-      let matches = isNameValid;
-
-      if (onlyCritical && rest.item.status !== AssetStatus.alert) {
-        matches = false;
+      if (isValid) {
+        return {
+          ...treeNode,
+          expanded: false,
+        };
       }
 
-      if (onlyEnergySensors && rest.item.sensorType !== SensorType.energy) {
-        matches = false;
-      }
+      const filteredChildren = filterTree(treeNode.children, filters);
 
-      if (filteredChildren.length > 0) {
-        matches = true;
+      if (filteredChildren.length) {
+        return {
+          ...treeNode,
+          children: filteredChildren,
+        };
       }
-
-      return matches
-        ? {
-            ...rest,
-            children: filteredChildren,
-          }
-        : null;
+      return null;
     })
     .filter(Boolean) as Tree;
 }

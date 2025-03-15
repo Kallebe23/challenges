@@ -1,13 +1,12 @@
 "use client";
 
 import {
-  FlattenedTree,
   flattenTree,
   toggleTreeItem,
   Tree,
   TreeItemType,
 } from "../../utils/tree";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import TreeItemRow from "./tree-item";
 import { useFilters } from "../../hooks/use-filters";
 import { useRouter } from "next/navigation";
@@ -19,6 +18,7 @@ const itemHeight = 35;
 export default function VirtualizedTree(props: { tree: Tree }) {
   const [filters] = useFilters();
   const { push } = useRouter();
+  const parentRef = useRef<HTMLDivElement>(null);
   const companyId = useCompanyId();
   const [scrollTop, setScrollTop] = useState(0);
 
@@ -28,36 +28,43 @@ export default function VirtualizedTree(props: { tree: Tree }) {
     setTree(props.tree);
   }, [props.tree]);
 
-  const parentRef = useRef<HTMLDivElement>(null);
+  const flattenedTree = useMemo(() => flattenTree(tree), [tree]);
 
   const containerHeight = parentRef.current?.clientHeight || 400;
 
-  const [flattenedTree, setFlattenedTree] = useState<FlattenedTree>(() => []);
-  const startIndex = Math.floor(scrollTop / itemHeight);
-  const endIndex = Math.min(
-    startIndex + Math.ceil(containerHeight / itemHeight),
-    flattenedTree.length
+  const startIndex = useMemo(
+    () => Math.floor(scrollTop / itemHeight),
+    [scrollTop]
   );
 
-  useEffect(() => {
-    const flattened = flattenTree(tree);
-    setFlattenedTree(flattened);
-  }, [tree]);
+  const endIndex = useMemo(
+    () =>
+      Math.min(
+        startIndex + Math.ceil(containerHeight / itemHeight),
+        flattenedTree.length
+      ),
+    [containerHeight, flattenedTree, startIndex]
+  );
 
-  const toggleItem = (id: string, type: TreeItemType) => {
-    const newTree = toggleTreeItem(id, tree);
-    setTree([...newTree]);
+  const visibleItems = useMemo(() => {
+    return flattenedTree.slice(startIndex, endIndex);
+  }, [flattenedTree, startIndex, endIndex]);
 
-    if (type === "component") {
-      const url = serialize(`/companies/${companyId}/assets`, {
-        ...filters,
-        asset: id,
-      });
-      push(url);
-    }
-  };
+  const toggleItem = useCallback(
+    (id: string, type: TreeItemType) => {
+      const newTree = toggleTreeItem(id, tree);
+      setTree([...newTree]);
 
-  const visibleItems = flattenedTree.slice(startIndex, endIndex);
+      if (type === "component") {
+        const url = serialize(`/companies/${companyId}/assets`, {
+          ...filters,
+          asset: id,
+        });
+        push(url);
+      }
+    },
+    [tree, companyId, push, filters]
+  );
 
   return (
     <div
