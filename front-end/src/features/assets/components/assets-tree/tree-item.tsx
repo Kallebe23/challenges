@@ -4,12 +4,12 @@ import Image from "next/image";
 import EnergySensorIcon from "@/assets/icons/energy-sensor.svg";
 import ArrowDownIcon from "@/assets/icons/arrow-down.svg";
 
-import { SensorType } from "@/types/assets";
+import { CompanyAsset, SensorType } from "@/types/assets";
 import { statusIcons, typeIcons } from "./asset-icons";
 import { TreeItem, TreeItemType } from "../../utils/tree";
 import { useMemo } from "react";
-import { useSelectedAsset } from "../../hooks/use-selected-asset";
 import SelectedComponentIcon from "@/assets/icons/component-selected.png";
+import { useAsset } from "@/stores/asset-store";
 
 export type TreeOptionProps = {
   type: "location" | "component" | "asset";
@@ -28,7 +28,7 @@ export default function TreeItemRow({
   onClick,
   isExpanded,
 }: TreeOptionProps) {
-  const [{ asset }] = useSelectedAsset();
+  const { selectAsset, selectedAsset } = useAsset();
 
   const statusIcon = useMemo(
     () => (item.status ? statusIcons[item.status] : null),
@@ -38,7 +38,7 @@ export default function TreeItemRow({
   // const isExpanded = useMemo(() => expanded.has(item.id), [expanded, item.id]);
   const leftPadding = depth * 24;
 
-  const isSelected = asset === item.id;
+  const isSelected = selectedAsset?.id === item.id;
 
   const typeIcon = useMemo(() => {
     if (isSelected) {
@@ -51,6 +51,9 @@ export default function TreeItemRow({
     <li
       onClick={() => {
         onClick(item.id, type, !isExpanded);
+        if (type === "component") {
+          selectAsset(item as CompanyAsset);
+        }
       }}
       className="tree-list-item"
       style={{

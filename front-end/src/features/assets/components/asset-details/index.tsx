@@ -1,18 +1,11 @@
-// import { statusIcons } from "../assets-tree/asset-icons";
-import { searchParamsCache } from "@/searchParams";
-import { getCompanyAssets } from "@/services/tractian-fake-api";
+"use client";
 import Image from "next/image";
 import { statusIcons } from "../assets-tree/asset-icons";
 import { SensorType } from "@/types/assets";
+import { useAsset } from "@/stores/asset-store";
 
-export default async function AssetDetails({
-  companyId,
-}: {
-  companyId: string;
-}) {
-  const assetId = searchParamsCache.get("asset");
-  const assets = await getCompanyAssets(companyId);
-  const selectedAsset = assets.find((asset) => asset.id === assetId);
+export default function AssetDetails() {
+  const { selectedAsset } = useAsset();
 
   if (!selectedAsset) return null;
 

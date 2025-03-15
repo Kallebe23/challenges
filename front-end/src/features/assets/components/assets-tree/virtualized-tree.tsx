@@ -1,25 +1,13 @@
 "use client";
 
-import {
-  flattenTree,
-  toggleTreeItem,
-  Tree,
-  TreeItemType,
-} from "../../utils/tree";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { flattenTree, toggleTreeItem, Tree } from "../../utils/tree";
+import { useEffect, useMemo, useRef, useState } from "react";
 import TreeItemRow from "./tree-item";
-import { useFilters } from "../../hooks/use-filters";
-import { useRouter } from "next/navigation";
-import { useCompanyId } from "@/hooks/use-company-id";
-import { serialize } from "@/searchParams";
 
 const itemHeight = 35;
 
 export default function VirtualizedTree(props: { tree: Tree }) {
-  const [filters] = useFilters();
-  const { push } = useRouter();
   const parentRef = useRef<HTMLDivElement>(null);
-  const companyId = useCompanyId();
   const [scrollTop, setScrollTop] = useState(0);
 
   const [tree, setTree] = useState<Tree>([]);
@@ -50,21 +38,10 @@ export default function VirtualizedTree(props: { tree: Tree }) {
     return flattenedTree.slice(startIndex, endIndex);
   }, [flattenedTree, startIndex, endIndex]);
 
-  const toggleItem = useCallback(
-    (id: string, type: TreeItemType) => {
-      const newTree = toggleTreeItem(id, tree);
-      setTree([...newTree]);
-
-      if (type === "component") {
-        const url = serialize(`/companies/${companyId}/assets`, {
-          ...filters,
-          asset: id,
-        });
-        push(url);
-      }
-    },
-    [tree, companyId, push, filters]
-  );
+  const toggleItem = (id: string) => {
+    const newTree = toggleTreeItem(id, tree);
+    setTree([...newTree]);
+  };
 
   return (
     <div
