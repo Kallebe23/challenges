@@ -1,3 +1,12 @@
+# Demo
+
+https://github.com/user-attachments/assets/a7034813-d852-4377-88e3-ad1a59e0bdde
+
+# Se eu tivesse mais tempo
+
+- Iria refatorar o código
+- Trabalharia mais na parte de seleção de componentes
+
 # Front End Software Engineer
 ### Context
 
